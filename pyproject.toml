@@ -1,0 +1,115 @@
+[build-system]
+requires = [
+    "build",
+    "setuptools>=67.0",
+    "wheel>=0.38.4",
+    "pip>=23.0.1",
+    "pip-tools>=6.12.3",
+    "twine",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "big-salad"
+version = "0.1.0"
+description = """It's a salad, only bigger, with lots of stuff in it.
+---
+Some general purpose tooling to make my daily tasks easier
+"""
+authors = [{ name = "Steven Locke", email = "steve@locke.codes" }]
+keywords = ["python"]
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "attrs",
+    "boto3",
+    "click",
+    "psycopg2-binary",
+    "pymysql",
+    "sqlalchemy",
+]
+
+[project.urls]
+repository = "https://gitlab.com/stevenlocke/big-salad"
+
+[project.optional-dependencies]
+build = [
+    "build",
+    "setuptools>=67.0",
+    "wheel>=0.38.4",
+    "pip>=23.0.1",
+    "pip-tools>=6.12.3",
+    "twine",
+]
+
+dev = [
+    "black",
+    "coverage[toml]",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["*"]  # alternatively: `exclude = ["additional*"]`
+namespaces = false
+
+[project.scripts]
+bs = "big_salad.cli:cli"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--junitxml=reports/junit.xml -v"
+testpaths = [
+    "tests",
+]
+python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+
+# .coveragerc to control coverage.py
+[tool.coverage.run]
+branch = true
+source = ["src", "tests"]
+
+[tool.coverage.report]
+#fail_under = 95
+fail_under = 0
+show_missing = true
+skip_empty = true
+
+[tool.coverage.xml]
+output = "reports/coverage.xml"
+
+[tool.coverage.html]
+directory = "reports/html"
+
+[tool.pylint.main]
+ignore = ["venv", "compiled_validators", ".venv", "build", "*.egg-info", ".pytest_cache"]
+
+[tool.pylint."messages control"]
+disable = []
+
+[tool.pylint.format]
+# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
+# expected-line-ending-format =
+max-line-length = 120
+
+[tool.black]
+line-length = 120
+exclude = 'compiled_validators'
+include = '\.pyi?$'
+# 'extend-exclude' excludes files or directories in addition to the defaults
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+(
+  /venv
+  | /.venv
+  | /*.egg-info
+  | /build
+  | /.pytest_cache
+)
+'''
