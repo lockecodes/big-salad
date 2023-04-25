@@ -3,3 +3,4 @@ services:
   bs:
     build:
       target: python-pinner
+    user: root

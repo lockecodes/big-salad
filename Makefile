@@ -1,5 +1,18 @@
+SHELL=bash
 CONTAINER_NAME:=big-salad
-VERSION := $(shell git describe --tags --always)
+VERSION:=$(shell git describe --tags --always)
+PODMAN ?= false
+PODMAN_COMPOSE ?= false
+DOCKER:="$(shell if ${PODMAN}; then \
+		echo podman; \
+		else echo docker; \
+	fi \
+)"
+DOCKER_COMPOSE:="$(shell if ${PODMAN_COMPOSE}; then \
+		echo podman-compose; \
+		else echo docker-compose; \
+	fi \
+)"
 
 ########################################################################################################################
 ########## Docker builds
@@ -8,7 +21,7 @@ BUILD_TARGET ?= 'release'
 .PHONY: build-config
 build-config:
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.${BUILD_TARGET}.yaml \
 		config
@@ -17,7 +30,7 @@ build-config:
 build-base:
 	BUILD_TARGET='release-base' ${MAKE} build-config
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.release-base.yaml \
 		build \
@@ -27,7 +40,7 @@ build-base:
 build-release:
 	BUILD_TARGET='release' ${MAKE} build-config
 	VERSION=latest \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.release.yaml \
 		build \
@@ -37,7 +50,7 @@ build-release:
 build-dev:
 	BUILD_TARGET='dev' ${MAKE} build-config
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.dev.yaml \
 		build \
@@ -47,7 +60,7 @@ build-dev:
 build-pinner:
 	BUILD_TARGET='python-pinner' ${MAKE} build-config
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.python-pinner.yaml \
 		build \
@@ -69,19 +82,21 @@ build: build-base build-release build-dev
 .PHONY: lint
 lint:
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 			-f docker-compose.yaml \
 			-f docker-compose.dev.yaml \
 			run \
 			--rm \
 			bs \
-			bash -c "black --config /opt/pyproject.toml . \
-			&& pylint --recursive=y /opt/src /opt/tests"
+			bash -c "black \
+				--config /opt/big_salad/pyproject.toml . \
+				&& pylint --recursive=y \
+				/opt/big_salad/src /opt/big_salad/tests"
 
 .PHONY: shell
 shell:
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.dev.yaml \
 		run \
@@ -92,7 +107,7 @@ shell:
 .PHONY: test
 test:
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 			-f docker-compose.yaml \
 			-f docker-compose.dev.yaml \
 			run \
@@ -115,7 +130,7 @@ test:
 .PHONY: update-pins
 update-pins: build-pinner # update the dependency pins
 	VERSION=${VERSION} \
-		docker-compose \
+		${DOCKER_COMPOSE} \
 		-f docker-compose.yaml \
 		-f docker-compose.python-pinner.yaml \
 		run \
@@ -144,33 +159,4 @@ update-pins: build-pinner # update the dependency pins
 
 ########################################################################################################################
 ########### End update python pins
-########################################################################################################################
-
-########################################################################################################################
-########### Package deployment
-########################################################################################################################
-
-.PHONY: deploy
-deploy: build-release
-	VERSION=${VERSION} \
-		docker-compose \
-		-f docker-compose.yaml \
-		-f docker-compose.release.yaml \
-		run \
-		--rm \
-		bs \
-		/bin/bash -c 'python -m pip \
-			install .[build] \
-		&& python -m build \
-			--wheel \
-			--outdir ./dist \
-		&& twine check dist/big_salad*'
-#		\
-#		&& twine upload \
-#			--skip-existing \
-#			--non-interactive \
-#			dist/big_salad*'
-
-########################################################################################################################
-########### End Package deployment
 ########################################################################################################################

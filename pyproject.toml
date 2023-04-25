@@ -12,9 +12,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "big-salad"
 version = "0.1.0"
-description = """It's a salad, only bigger, with lots of stuff in it.
----
-Some general purpose tooling to make my daily tasks easier
+description = """It's a salad, only bigger, with lots of stuff in it.\n---\nSome general purpose tooling to make my daily tasks easier
 """
 authors = [{ name = "Steven Locke", email = "steve@locke.codes" }]
 keywords = ["python"]
@@ -24,24 +22,20 @@ dependencies = [
     "attrs",
     "boto3",
     "click",
+    "deepdiff",
+    "docker",
+    "podman",
     "psycopg2-binary",
     "pymysql",
+    "pyyaml",
     "sqlalchemy",
+    "orjson",
 ]
 
 [project.urls]
 repository = "https://gitlab.com/stevenlocke/big-salad"
 
 [project.optional-dependencies]
-build = [
-    "build",
-    "setuptools>=67.0",
-    "wheel>=0.38.4",
-    "pip>=23.0.1",
-    "pip-tools>=6.12.3",
-    "twine",
-]
-
 dev = [
     "black",
     "coverage[toml]",

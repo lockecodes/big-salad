@@ -5,7 +5,28 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile
+# ideally this would be podman but need to handle image mapping
+#    user: podman
+    privileged: true
     environment:
-      - VERSION
+      - BS_CONTEXT_DIR=$BS_CONTEXT_DIR
+      - DEFAULT_INSTALL_LOCATION=$DEFAULT_INSTALL_LOCATION
+      - VERSION=$VERSION
+      - USER_HOME=$USER_HOME
+      - IN_DOCKER=true
+      - DISPLAY=${DISPLAY}
+#      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+#      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+#      - DESKTOP_SESSION=${DESKTOP_SESSION}
+#      - XDG_SESSION_TYPE=wayland
+#      - PIPEWIRE_RUNTIME_DIR=/tmp
     volumes:
-      - ./:/opt/
+      - $DEFAULT_INSTALL_LOCATION:/opt/big_salad
+      - $USER_HOME:/opt/usr/home
+      - $BS_CONTEXT_DIR:/opt/context
+      - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock
+#      - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/tmp/${WAYLAND_DISPLAY}
+#      - /run/user/1000/pipewire-0:/tmp/pipewire-0
+#    devices:
+#      - /dev/snd
+    network_mode: host

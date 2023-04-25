@@ -3,3 +3,27 @@ services:
   bs:
     build:
       target: dev
+    user: root
+    depends_on:
+      - pg
+      - mysql
+  mysql:
+    image: mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_PASSWORD: test
+      MYSQL_USER: test
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+  pg:
+    image: postgres:12
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: test
+      POSTGRES_USER: test
